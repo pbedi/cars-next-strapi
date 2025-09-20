@@ -1,0 +1,33 @@
+{
+  "collectionName": "components_navigation_menu_items",
+  "info": {
+    "displayName": "Menu Item",
+    "description": "Navigation menu item with optional submenu"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    "url": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "target": {
+      "type": "enumeration",
+      "enum": ["_self", "_blank"],
+      "default": "_self"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "submenu": {
+      "type": "component",
+      "repeatable": true,
+      "component": "navigation.submenu-item"
+    }
+  }
+}

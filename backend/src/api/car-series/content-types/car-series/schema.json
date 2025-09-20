@@ -1,0 +1,66 @@
+{
+  "kind": "collectionType",
+  "collectionName": "car_series",
+  "info": {
+    "singularName": "car-series",
+    "pluralName": "car-series-collection",
+    "displayName": "Car Series",
+    "description": "Car collection series (Series 1, 300, 356, Landrover)"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "maxLength": 1000
+    },
+    "hero": {
+      "type": "component",
+      "repeatable": false,
+      "component": "layout.hero"
+    },
+    "carousel": {
+      "type": "component",
+      "repeatable": false,
+      "component": "layout.carousel"
+    },
+    "specifications": {
+      "type": "richtext"
+    },
+    "features": {
+      "type": "json"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "availability": {
+      "type": "enumeration",
+      "enum": [
+        "available",
+        "sold-out",
+        "coming-soon"
+      ],
+      "default": "available"
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo"
+    },
+    "publishedAt": {
+      "type": "datetime"
+    }
+  }
+}

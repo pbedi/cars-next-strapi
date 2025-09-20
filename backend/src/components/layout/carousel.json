@@ -1,0 +1,42 @@
+{
+  "collectionName": "components_layout_carousels",
+  "info": {
+    "displayName": "Carousel",
+    "description": "Image carousel with 4 images"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "autoPlay": {
+      "type": "boolean",
+      "default": true
+    },
+    "autoPlayInterval": {
+      "type": "integer",
+      "default": 5000,
+      "min": 1000,
+      "max": 10000
+    },
+    "showThumbnails": {
+      "type": "boolean",
+      "default": true
+    },
+    "showArrows": {
+      "type": "boolean",
+      "default": true
+    },
+    "showDots": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
