@@ -319,13 +319,19 @@ export default function MediaLibrary() {
                       <div className="aspect-square bg-gray-100 flex items-center justify-center">
                         {file.mimeType?.startsWith('image/') ? (
                           <img
-                            src={file.url}
+                            src={`/api/cms/media/serve/${file.id}`}
                             alt={file.altText || file.originalName}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error('Image failed to load:', file.id);
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }}
                           />
-                        ) : (
-                          <div className="text-4xl">{getFileIcon(file.mimeType)}</div>
-                        )}
+                        ) : null}
+                        <div className="text-4xl hidden items-center justify-center w-full h-full">
+                          {getFileIcon(file.mimeType)}
+                        </div>
                       </div>
                       <div className="p-2">
                         <p className="text-xs font-medium text-gray-900 truncate" title={file.originalName}>
@@ -339,7 +345,7 @@ export default function MediaLibrary() {
                       <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center mr-3">
                         {file.mimeType?.startsWith('image/') ? (
                           <img
-                            src={file.url}
+                            src={`/api/cms/media/serve/${file.id}`}
                             alt={file.altText || file.originalName}
                             className="w-full h-full object-cover rounded"
                           />

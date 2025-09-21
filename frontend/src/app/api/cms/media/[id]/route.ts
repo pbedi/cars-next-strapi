@@ -78,18 +78,7 @@ export async function PUT(
 
     const updatedMedia = await db.media.update({
       where: { id },
-      data: validatedData,
-      include: {
-        pages: {
-          select: { id: true, title: true, slug: true }
-        },
-        carSeries: {
-          select: { id: true, name: true, slug: true }
-        },
-        contentBlocks: {
-          select: { id: true, type: true, page: { select: { title: true } } }
-        }
-      }
+      data: validatedData
     })
 
     return successResponse(updatedMedia, 'Media file updated successfully')
