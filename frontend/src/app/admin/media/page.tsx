@@ -319,7 +319,7 @@ export default function MediaLibrary() {
                       <div className="aspect-square bg-gray-100 flex items-center justify-center">
                         {file.mimeType?.startsWith('image/') ? (
                           <img
-                            src={`/api/cms/media/serve/${file.id}`}
+                            src={`/api/cms/media/serve/${file.id}?v=${Date.now()}`}
                             alt={file.altText || file.originalName}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -345,7 +345,7 @@ export default function MediaLibrary() {
                       <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center mr-3">
                         {file.mimeType?.startsWith('image/') ? (
                           <img
-                            src={`/api/cms/media/serve/${file.id}`}
+                            src={`/api/cms/media/serve/${file.id}?v=${Date.now()}`}
                             alt={file.altText || file.originalName}
                             className="w-full h-full object-cover rounded"
                           />
