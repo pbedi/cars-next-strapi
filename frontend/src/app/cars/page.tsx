@@ -1,40 +1,46 @@
 import Link from 'next/link';
 import PageTemplate from '@/components/PageTemplate';
+import { cmsService, cmsHelpers, fallbackData } from '@/lib/cms-service';
 
-const carSeries = [
-  {
-    name: 'Series 1',
-    slug: 'series-1',
-    description: 'Classic elegance redefined with modern performance',
-    image: '/images/series-1-hero.jpg',
-  },
-  {
-    name: '300 Series',
-    slug: '300',
-    description: 'Power meets sophistication in every detail',
-    image: '/images/300-hero.jpg',
-  },
-  {
-    name: '356 Heritage',
-    slug: '356',
-    description: 'Timeless automotive art and engineering excellence',
-    image: '/images/356-hero.jpg',
-  },
-  {
-    name: 'Landrover',
-    slug: 'landrover',
-    description: 'Built for adventure, designed for excellence',
-    image: '/images/landrover-hero.jpg',
-  },
-];
+export default async function CarsPage() {
+  let pageProps;
+  let carSeries;
 
-export default function CarsPage() {
+  try {
+    // Try to fetch cars page data from CMS
+    const carsPage = await cmsService.getPageBySlug('cars');
+    const carSeriesData = await cmsService.getCarSeries();
+
+    if (carsPage) {
+      pageProps = cmsHelpers.pageToProps(carsPage);
+    } else {
+      // Fallback page props
+      pageProps = {
+        heroTitle: "Our Car Collection",
+        heroSubtitle: "Premium Automotive Excellence",
+        heroDescription: "Explore our carefully curated collection of classic and modern vehicles",
+        heroImageUrl: "/images/cars-hero.jpg"
+      };
+    }
+
+    // Transform car series data for display
+    carSeries = cmsHelpers.carSeriesListToOverview(carSeriesData);
+
+  } catch (error) {
+    console.error('Error fetching cars page data from CMS:', error);
+    // Use fallback data if CMS is unavailable
+    pageProps = {
+      heroTitle: "Our Car Collection",
+      heroSubtitle: "Premium Automotive Excellence",
+      heroDescription: "Explore our carefully curated collection of classic and modern vehicles",
+      heroImageUrl: "/images/cars-hero.jpg"
+    };
+    carSeries = fallbackData.carSeries;
+  }
+
   return (
     <PageTemplate
-      heroTitle="Our Car Collection"
-      heroSubtitle="Premium Automotive Excellence"
-      heroDescription="Explore our carefully curated collection of classic and modern vehicles"
-      heroImageUrl="/images/cars-hero.jpg"
+      {...pageProps}
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
@@ -42,7 +48,7 @@ export default function CarsPage() {
             Choose Your Series
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Each series represents a unique blend of heritage, performance, and craftsmanship. 
+            Each series represents a unique blend of heritage, performance, and craftsmanship.
             Discover the collection that speaks to your automotive passion.
           </p>
         </div>

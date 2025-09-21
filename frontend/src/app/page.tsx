@@ -1,48 +1,29 @@
 import PageTemplate from '@/components/PageTemplate';
+import { cmsService, cmsHelpers, fallbackData } from '@/lib/cms-service';
 
-// Sample data - replace with Strapi data
-const sampleCarouselImages = [
-  {
-    id: '1',
-    src: '/images/gallery/series1.jpg',
-    alt: 'Classic Car Series 1',
-    title: 'Series 1 Collection',
-    description: 'Discover our premium Series 1 automotive collection',
-  },
-  {
-    id: '2',
-    src: '/images/gallery/300.jpg',
-    alt: 'Classic Car 300',
-    title: '300 Series',
-    description: 'Experience the power and elegance of the 300 series',
-  },
-  {
-    id: '3',
-    src: '/images/gallery/spyder.jpg',
-    alt: 'Classic Car 356',
-    title: '356 Heritage',
-    description: 'Timeless design meets modern performance',
-  },
-  {
-    id: '4',
-    src: '/images/gallery/landjunior.jpg',
-    alt: 'Landrover Collection',
-    title: 'Landrover Adventure',
-    description: 'Built for adventure, designed for excellence',
-  },
-];
+// Server component to fetch data from CMS
+export default async function HomePage() {
+  let pageProps;
 
-export default function HomePage() {
+  try {
+    // Try to fetch homepage data from CMS
+    const homePage = await cmsService.getPageBySlug('home');
+
+    if (homePage) {
+      pageProps = cmsHelpers.pageToProps(homePage);
+    } else {
+      // Fallback to default data if no CMS page found
+      pageProps = fallbackData.homepage;
+    }
+  } catch (error) {
+    console.error('Error fetching homepage data from CMS:', error);
+    // Use fallback data if CMS is unavailable
+    pageProps = fallbackData.homepage;
+  }
+
   return (
     <PageTemplate
-      heroTitle="JuniorCars"
-      heroSubtitle="Premium Automotive Collection"
-      heroDescription="Discover our curated collection of classic and modern vehicles, featuring the finest in automotive excellence."
-      heroImageUrl="/images/hero/hero-car.jpg"
-      heroVideoUrl="/videos/hero-video.mp4"
-      heroHasVideo={false}
-      carouselTitle="Featured Collection"
-      carouselImages={sampleCarouselImages}
+      {...pageProps}
     >
       {/* Additional content section */}
       <div className="text-center max-w-4xl mx-auto">
