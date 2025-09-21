@@ -5,15 +5,21 @@ A modern automotive website built with Next.js frontend and Strapi CMS backend.
 ## 🏗️ Project Structure
 
 ```
-car_next_strapi/
+carsnextstrapi/
 ├── frontend/          # Next.js application (Port 3000)
 │   ├── src/          # Source code
 │   ├── public/       # Static assets
 │   └── package.json  # Frontend dependencies
-├── backend/          # Strapi CMS (Port 1337)
+├── backend/          # Strapi CMS (Port 1337) - PRESERVED as fallback
 │   ├── src/          # Strapi source
 │   ├── config/       # Strapi configuration
 │   └── package.json  # Backend dependencies
+├── cms/              # NEW: Custom CMS (Budget-friendly replacement)
+│   ├── prisma/       # Database schema and migrations
+│   ├── lib/          # Database client and utilities
+│   ├── types/        # TypeScript definitions
+│   ├── api/          # API route handlers
+│   └── README.md     # Custom CMS documentation
 └── package.json      # Root package.json for scripts
 ```
 
@@ -61,11 +67,21 @@ npm run start
 - **SEO Optimized**: Meta tags, Open Graph
 - **TypeScript**: Full type safety
 
-### Backend (Strapi CMS)
+### Backend Options
+
+#### Current: Strapi CMS (Preserved)
 - **Headless CMS**: Content management
 - **REST API**: Dynamic content delivery
 - **Media Management**: Images and videos
 - **Admin Panel**: Easy content editing
+
+#### NEW: Custom CMS (Budget-Friendly)
+- **Zero Cost**: Built with free tier services
+- **Mobile-First**: Optimized for mobile performance
+- **Custom Admin**: Tailored admin interface
+- **Image Optimization**: Automatic WebP/AVIF conversion
+- **Type-Safe**: Full TypeScript integration
+- **Easy Fallback**: Switch back to Strapi anytime
 
 ## 🛠️ Available Scripts
 

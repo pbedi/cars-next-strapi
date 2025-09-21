@@ -116,3 +116,5 @@ Thumbs.db
 *.tmp
 *.temp
 
+
+/generated/prisma
