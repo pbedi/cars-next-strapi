@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     // Check if user is logged in
-    const sessionToken = localStorage.getItem('cms_session')
+    const sessionToken = localStorage.getItem('cms_session_token')
     const userData = localStorage.getItem('cms_user')
 
     if (!sessionToken || !userData) {
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('cms_session')
+    localStorage.removeItem('cms_session_token')
     localStorage.removeItem('cms_user')
     router.push('/admin/login')
   }

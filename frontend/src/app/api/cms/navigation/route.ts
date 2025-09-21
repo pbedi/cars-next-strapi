@@ -22,8 +22,14 @@ export async function GET(request: NextRequest) {
     const searchParams = getSearchParams(request)
     const { page, limit, search, sortBy, sortOrder } = paginationSchema.parse(searchParams)
 
-    // Build where clause for search
-    const where = buildWhereClause(search, ['label', 'url'])
+    // Build where clause for search (navigation items don't have published field)
+    const where: any = {}
+    if (search) {
+      where.OR = [
+        { label: { contains: search, mode: 'insensitive' } },
+        { url: { contains: search, mode: 'insensitive' } }
+      ]
+    }
 
     // Get total count
     const total = await db.navigationItem.count({ where })
@@ -59,18 +65,16 @@ export async function POST(request: NextRequest) {
     const body = await parseRequestBody(request)
     const validatedData = createNavigationItemSchema.parse(body)
 
-    // Generate slug if not provided
-    if (!validatedData.slug) {
-      validatedData.slug = generateSlug(validatedData.label)
-    }
-
-    // Check for slug uniqueness
-    const existingItem = await db.navigationItem.findUnique({
-      where: { slug: validatedData.slug }
+    // Check for label uniqueness at the same level
+    const existingItem = await db.navigationItem.findFirst({
+      where: {
+        label: validatedData.label,
+        parentId: validatedData.parentId || null
+      }
     })
 
     if (existingItem) {
-      return errorResponse('Navigation item with this slug already exists', 400)
+      return errorResponse('Navigation item with this label already exists at this level', 400)
     }
 
     // If parent is specified, verify it exists

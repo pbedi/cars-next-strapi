@@ -8,7 +8,6 @@ import {
   handleApiError,
   parseRequestBody,
   getSearchParams,
-  buildWhereClause,
   buildOrderBy,
   validateMethod,
 } from '../../../../lib/cms/api-utils'
@@ -21,8 +20,15 @@ export async function GET(request: NextRequest) {
     const searchParams = getSearchParams(request)
     const { page, limit, search, sortBy, sortOrder } = paginationSchema.parse(searchParams)
 
-    // Build where clause for search
-    const where = buildWhereClause(search, ['filename', 'originalName', 'altText'])
+    // Build where clause for search (media doesn't have published field)
+    const where: any = {}
+    if (search) {
+      where.OR = [
+        { filename: { contains: search, mode: 'insensitive' } },
+        { originalName: { contains: search, mode: 'insensitive' } },
+        { altText: { contains: search, mode: 'insensitive' } }
+      ]
+    }
 
     // Add media type filter if provided
     if (searchParams.type) {
@@ -32,8 +38,8 @@ export async function GET(request: NextRequest) {
       } else if (mediaType === 'video') {
         where.mimeType = { startsWith: 'video/' }
       } else if (mediaType === 'document') {
-        where.mimeType = { 
-          not: { 
+        where.mimeType = {
+          not: {
             OR: [
               { startsWith: 'image/' },
               { startsWith: 'video/' }
@@ -99,25 +105,9 @@ export async function DELETE(request: NextRequest) {
       return errorResponse('IDs array is required', 400)
     }
 
-    // Check if any media files are in use
-    const mediaInUse = await db.media.findMany({
-      where: {
-        id: { in: ids },
-        OR: [
-          { pages: { some: {} } },
-          { carSeries: { some: {} } },
-          { contentBlocks: { some: {} } }
-        ]
-      },
-      select: { id: true, filename: true }
-    })
-
-    if (mediaInUse.length > 0) {
-      return errorResponse(
-        `Cannot delete media files that are in use: ${mediaInUse.map(m => m.filename).join(', ')}`,
-        400
-      )
-    }
+    // Note: In the current schema, Media doesn't have direct relationships
+    // In a future version, you might want to add relationships and check usage
+    // For now, we'll allow deletion since media files are standalone
 
     // Delete media files
     const result = await db.media.deleteMany({

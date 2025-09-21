@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { db } from '../../../../../../cms/lib/db'
-import { updateCarSeriesSchema } from '../../../../../../cms/lib/validations'
+import { db } from '../../../../../lib/cms/db'
+import { updateCarSeriesSchema } from '../../../../../lib/cms/validations'
 import {
   successResponse,
   errorResponse,
@@ -8,7 +8,7 @@ import {
   parseRequestBody,
   validateMethod,
   validateId,
-} from '../../../../../../cms/lib/api-utils'
+} from '../../../../../lib/cms/api-utils'
 
 // GET /api/cms/car-series/[id] - Get a specific car series
 export async function GET(

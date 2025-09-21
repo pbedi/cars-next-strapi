@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { db } from '../../../../../cms/lib/db'
-import { createPageSchema, paginationSchema, searchSchema } from '../../../../../cms/lib/validations'
+import { db } from '../../../../lib/cms/db'
+import { createPageSchema, paginationSchema, searchSchema } from '../../../../lib/cms/validations'
 import {
   successResponse,
   errorResponse,
@@ -12,7 +12,7 @@ import {
   buildOrderBy,
   validateMethod,
   generateSlug,
-} from '../../../../../cms/lib/api-utils'
+} from '../../../../lib/cms/api-utils'
 
 // GET /api/cms/pages - List all pages with pagination and search
 export async function GET(request: NextRequest) {
@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = getSearchParams(request)
-    
+
     // Validate query parameters
     const validatedParams = paginationSchema.merge(searchSchema).parse(searchParams)
-    
+
     const where = buildWhereClause(validatedParams)
     const orderBy = buildOrderBy(validatedParams.sortBy, validatedParams.sortOrder)
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     // Generate slug if not provided or ensure uniqueness
     let slug = validatedData.slug || generateSlug(validatedData.title)
-    
+
     // Check if slug already exists
     const existingPage = await db.page.findUnique({
       where: { slug }

@@ -37,7 +37,7 @@ export default function MediaLibrary() {
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('cms_token')
+    const token = localStorage.getItem('cms_session_token')
     if (!token) {
       router.push('/admin/login')
       return
@@ -302,9 +302,8 @@ export default function MediaLibrary() {
               {filteredFiles.map((file) => (
                 <div
                   key={file.id}
-                  className={`border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
-                    selectedFiles.has(file.id) ? 'ring-2 ring-blue-500' : ''
-                  } ${viewMode === 'list' ? 'flex items-center p-3' : 'aspect-square'}`}
+                  className={`border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${selectedFiles.has(file.id) ? 'ring-2 ring-blue-500' : ''
+                    } ${viewMode === 'list' ? 'flex items-center p-3' : 'aspect-square'}`}
                   onClick={() => {
                     if (selectedFiles.has(file.id)) {
                       const newSelected = new Set(selectedFiles)
@@ -378,7 +377,7 @@ export default function MediaLibrary() {
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Files</h2>
-                
+
                 <div
                   className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors"
                   onDragOver={handleDragOver}
@@ -429,7 +428,7 @@ export default function MediaLibrary() {
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Edit Media File</h2>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Alt Text

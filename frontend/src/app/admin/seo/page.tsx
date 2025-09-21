@@ -7,31 +7,22 @@ interface SEOData {
   overview: {
     totalPages: number
     publishedPages: number
+    pagesWithSEO: number
+    totalCarSeries: number
     seoScore: number
   }
-  issues: {
-    missingMetaTitles: number
-    missingMetaDescriptions: number
-    longMetaTitles: number
-    longMetaDescriptions: number
-    duplicateMetaTitles: number
-  }
-  pagesWithIssues: Array<{
+  recentPages: Array<{
     id: string
     title: string
     slug: string
-    metaTitle?: string
-    metaDescription?: string
+    seoData?: {
+      metaTitle?: string
+      metaDescription?: string
+    }
     published: boolean
     updatedAt: string
   }>
-  recommendations: Array<{
-    type: 'error' | 'warning' | 'info'
-    title: string
-    description: string
-    action: string
-    priority: 'high' | 'medium' | 'low'
-  }>
+  recommendations: string[]
 }
 
 export default function SEOManagement() {
@@ -45,7 +36,7 @@ export default function SEOManagement() {
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('cms_token')
+    const token = localStorage.getItem('cms_session_token')
     if (!token) {
       router.push('/admin/login')
       return
@@ -222,8 +213,8 @@ export default function SEOManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Issues Found</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {seoData.issues.missingMetaTitles + seoData.issues.missingMetaDescriptions}
+                <p className="text-2xl font-bold text-green-600">
+                  {seoData.overview.totalPages - seoData.overview.pagesWithSEO}
                 </p>
               </div>
               <div className="p-3 rounded-full bg-red-100 text-red-600">
@@ -233,38 +224,32 @@ export default function SEOManagement() {
           </div>
         </div>
 
-        {/* SEO Issues Breakdown */}
+        {/* Content Statistics */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">SEO Issues Breakdown</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 bg-red-50 rounded-lg">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Content Statistics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-red-800">Missing Meta Titles</span>
-                <span className="text-lg font-bold text-red-600">{seoData.issues.missingMetaTitles}</span>
+                <span className="text-sm font-medium text-blue-800">Total Pages</span>
+                <span className="text-lg font-bold text-blue-600">{seoData.overview.totalPages}</span>
               </div>
             </div>
-            <div className="p-4 bg-red-50 rounded-lg">
+            <div className="p-4 bg-green-50 rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-red-800">Missing Meta Descriptions</span>
-                <span className="text-lg font-bold text-red-600">{seoData.issues.missingMetaDescriptions}</span>
+                <span className="text-sm font-medium text-green-800">Published Pages</span>
+                <span className="text-lg font-bold text-green-600">{seoData.overview.publishedPages}</span>
               </div>
             </div>
-            <div className="p-4 bg-yellow-50 rounded-lg">
+            <div className="p-4 bg-purple-50 rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-yellow-800">Long Meta Titles</span>
-                <span className="text-lg font-bold text-yellow-600">{seoData.issues.longMetaTitles}</span>
-              </div>
-            </div>
-            <div className="p-4 bg-yellow-50 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-yellow-800">Long Meta Descriptions</span>
-                <span className="text-lg font-bold text-yellow-600">{seoData.issues.longMetaDescriptions}</span>
+                <span className="text-sm font-medium text-purple-800">Pages with SEO</span>
+                <span className="text-lg font-bold text-purple-600">{seoData.overview.pagesWithSEO}</span>
               </div>
             </div>
             <div className="p-4 bg-orange-50 rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-orange-800">Duplicate Meta Titles</span>
-                <span className="text-lg font-bold text-orange-600">{seoData.issues.duplicateMetaTitles}</span>
+                <span className="text-sm font-medium text-orange-800">Car Series</span>
+                <span className="text-lg font-bold text-orange-600">{seoData.overview.totalCarSeries}</span>
               </div>
             </div>
           </div>
@@ -281,19 +266,12 @@ export default function SEOManagement() {
             </div>
           ) : (
             <div className="space-y-4">
-              {seoData.recommendations.map((rec, index) => (
+              {seoData.recommendations.map((recommendation, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <div className="text-2xl">{getTypeIcon(rec.type)}</div>
+                    <div className="text-2xl">💡</div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-medium text-gray-900">{rec.title}</h3>
-                        <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(rec.priority)}`}>
-                          {rec.priority}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mb-2">{rec.description}</p>
-                      <p className="text-blue-600 text-sm font-medium">{rec.action}</p>
+                      <p className="text-gray-700">{recommendation}</p>
                     </div>
                   </div>
                 </div>
@@ -302,10 +280,10 @@ export default function SEOManagement() {
           )}
         </div>
 
-        {/* Pages with Issues */}
+        {/* Recent Pages */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Pages with SEO Issues</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Recent Pages</h2>
             {selectedPages.size > 0 && (
               <div className="flex items-center gap-3">
                 <select
@@ -314,8 +292,7 @@ export default function SEOManagement() {
                   className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 >
                   <option value="">Select Action</option>
-                  <option value="generate_meta_titles">Generate Meta Titles</option>
-                  <option value="generate_meta_descriptions">Generate Meta Descriptions</option>
+                  <option value="generate_seo_data">Generate SEO Data</option>
                 </select>
                 <button
                   onClick={handleBulkAction}
@@ -328,11 +305,11 @@ export default function SEOManagement() {
             )}
           </div>
 
-          {seoData.pagesWithIssues.length === 0 ? (
+          {seoData.recentPages.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">✨</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">All pages look good!</h3>
-              <p className="text-gray-500">No pages with SEO issues found.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No pages found!</h3>
+              <p className="text-gray-500">Create some pages to see SEO data here.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -344,7 +321,7 @@ export default function SEOManagement() {
                         type="checkbox"
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedPages(new Set(seoData.pagesWithIssues.map(p => p.id)))
+                            setSelectedPages(new Set(seoData.recentPages.map(p => p.id)))
                           } else {
                             setSelectedPages(new Set())
                           }
@@ -367,7 +344,7 @@ export default function SEOManagement() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {seoData.pagesWithIssues.map((page) => (
+                  {seoData.recentPages.map((page) => (
                     <tr key={page.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
@@ -393,12 +370,12 @@ export default function SEOManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-wrap gap-1">
-                          {!page.metaTitle && (
+                          {!page.seoData?.metaTitle && (
                             <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
                               No Meta Title
                             </span>
                           )}
-                          {!page.metaDescription && (
+                          {!page.seoData?.metaDescription && (
                             <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
                               No Meta Description
                             </span>
@@ -406,11 +383,10 @@ export default function SEOManagement() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          page.published 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs rounded-full ${page.published
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                          }`}>
                           {page.published ? 'Published' : 'Draft'}
                         </span>
                       </td>

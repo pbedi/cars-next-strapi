@@ -28,9 +28,9 @@ export default function AdminLogin() {
 
       if (data.success) {
         // Store session token in localStorage (in production, use httpOnly cookies)
-        localStorage.setItem('cms_session', data.data.sessionToken)
+        localStorage.setItem('cms_session_token', data.data.sessionToken)
         localStorage.setItem('cms_user', JSON.stringify(data.data))
-        
+
         // Redirect to admin dashboard
         router.push('/admin')
       } else {

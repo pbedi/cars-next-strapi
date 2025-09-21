@@ -39,7 +39,7 @@ export default function NavigationManagement() {
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('cms_token')
+    const token = localStorage.getItem('cms_session_token')
     if (!token) {
       router.push('/admin/login')
       return
@@ -70,12 +70,12 @@ export default function NavigationManagement() {
     setError('')
 
     try {
-      const url = editingItem 
+      const url = editingItem
         ? `/api/cms/navigation/${editingItem.id}`
         : '/api/cms/navigation'
-      
+
       const method = editingItem ? 'PUT' : 'POST'
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -188,7 +188,7 @@ export default function NavigationManagement() {
             </button>
           </div>
         </div>
-        
+
         {/* Render children */}
         {childItems
           .filter(child => child.parentId === item.id)
@@ -278,7 +278,7 @@ export default function NavigationManagement() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   {editingItem ? 'Edit Navigation Item' : 'Add Navigation Item'}
                 </h2>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

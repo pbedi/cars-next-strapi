@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { db } from '../../../../../../cms/lib/db'
+import { db } from '../../../../../lib/cms/db'
 import {
   successResponse,
   errorResponse,
   handleApiError,
   parseRequestBody,
   validateMethod,
-} from '../../../../../../cms/lib/api-utils'
+} from '../../../../../lib/cms/api-utils'
 
 // POST /api/cms/auth/login - Admin login
 export async function POST(request: NextRequest) {
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
 
     // For development, we'll use a simple password check
     // In production, you should use bcrypt.compare(password, user.passwordHash)
-    const isValidPassword = password === 'admin123' || 
-                           await bcrypt.compare(password, user.passwordHash)
+    const isValidPassword = password === 'admin123' ||
+      await bcrypt.compare(password, user.passwordHash)
 
     if (!isValidPassword) {
       return errorResponse('Invalid credentials', 401)

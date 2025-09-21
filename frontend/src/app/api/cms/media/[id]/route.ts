@@ -17,21 +17,14 @@ export async function GET(
 ) {
   try {
     validateMethod(request, 'GET')
-    const id = validateId(params.id)
+    const id = params.id
+
+    if (!validateId(id)) {
+      return errorResponse('Invalid media ID', 400)
+    }
 
     const mediaFile = await db.media.findUnique({
-      where: { id },
-      include: {
-        pages: {
-          select: { id: true, title: true, slug: true }
-        },
-        carSeries: {
-          select: { id: true, name: true, slug: true }
-        },
-        contentBlocks: {
-          select: { id: true, type: true, page: { select: { title: true } } }
-        }
-      }
+      where: { id }
     })
 
     if (!mediaFile) {
@@ -51,7 +44,11 @@ export async function PUT(
 ) {
   try {
     validateMethod(request, 'PUT')
-    const id = validateId(params.id)
+    const id = params.id
+
+    if (!validateId(id)) {
+      return errorResponse('Invalid media ID', 400)
+    }
 
     const body = await parseRequestBody(request)
     const validatedData = updateMediaSchema.parse(body)
@@ -108,33 +105,24 @@ export async function DELETE(
 ) {
   try {
     validateMethod(request, 'DELETE')
-    const id = validateId(params.id)
+    const id = params.id
+
+    if (!validateId(id)) {
+      return errorResponse('Invalid media ID', 400)
+    }
 
     // Check if media file exists
     const existingMedia = await db.media.findUnique({
-      where: { id },
-      include: {
-        pages: { select: { id: true } },
-        carSeries: { select: { id: true } },
-        contentBlocks: { select: { id: true } }
-      }
+      where: { id }
     })
 
     if (!existingMedia) {
       return errorResponse('Media file not found', 404)
     }
 
-    // Check if media file is in use
-    const isInUse = existingMedia.pages.length > 0 || 
-                   existingMedia.carSeries.length > 0 || 
-                   existingMedia.contentBlocks.length > 0
-
-    if (isInUse) {
-      return errorResponse(
-        'Cannot delete media file that is currently in use. Please remove it from all pages and content first.',
-        400
-      )
-    }
+    // Note: In the current schema, Media doesn't have direct relationships
+    // In a future version, you might want to add relationships and check usage
+    // For now, we'll allow deletion since media files are standalone
 
     await db.media.delete({
       where: { id }

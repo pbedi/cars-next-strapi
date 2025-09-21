@@ -13,113 +13,43 @@ export async function GET(request: NextRequest) {
   try {
     validateMethod(request, 'GET')
 
-    // Get SEO statistics
+    // Get basic page statistics (simplified for now)
     const stats = await Promise.all([
-      // Pages with missing meta titles
-      db.page.count({
-        where: {
-          OR: [
-            { metaTitle: null },
-            { metaTitle: '' }
-          ]
-        }
-      }),
-      
-      // Pages with missing meta descriptions
-      db.page.count({
-        where: {
-          OR: [
-            { metaDescription: null },
-            { metaDescription: '' }
-          ]
-        }
-      }),
+      // Total pages
+      db.page.count(),
 
-      // Pages with long meta titles (>60 chars)
-      db.page.count({
-        where: {
-          metaTitle: {
-            not: null
-          }
-        }
-      }).then(async (total) => {
-        const pages = await db.page.findMany({
-          where: {
-            metaTitle: { not: null }
-          },
-          select: { metaTitle: true }
-        })
-        return pages.filter(p => p.metaTitle && p.metaTitle.length > 60).length
-      }),
-
-      // Pages with long meta descriptions (>160 chars)
-      db.page.count({
-        where: {
-          metaDescription: {
-            not: null
-          }
-        }
-      }).then(async (total) => {
-        const pages = await db.page.findMany({
-          where: {
-            metaDescription: { not: null }
-          },
-          select: { metaDescription: true }
-        })
-        return pages.filter(p => p.metaDescription && p.metaDescription.length > 160).length
-      }),
-
-      // Duplicate meta titles
-      db.page.groupBy({
-        by: ['metaTitle'],
-        where: {
-          metaTitle: { not: null }
-        },
-        _count: true,
-        having: {
-          metaTitle: {
-            _count: {
-              gt: 1
-            }
-          }
-        }
-      }).then(groups => groups.length),
-
-      // Published pages count
+      // Published pages
       db.page.count({
         where: { published: true }
       }),
 
-      // Total pages count
-      db.page.count()
+      // Pages with SEO data
+      db.page.count({
+        where: {
+          seoData: {
+            not: null
+          }
+        }
+      }),
+
+      // Car series count
+      db.carSeries.count(),
     ])
 
     const [
-      missingMetaTitles,
-      missingMetaDescriptions,
-      longMetaTitles,
-      longMetaDescriptions,
-      duplicateMetaTitles,
+      totalPages,
       publishedPages,
-      totalPages
+      pagesWithSEO,
+      totalCarSeries
     ] = stats
 
-    // Get pages with SEO issues
-    const pagesWithIssues = await db.page.findMany({
-      where: {
-        OR: [
-          { metaTitle: null },
-          { metaTitle: '' },
-          { metaDescription: null },
-          { metaDescription: '' }
-        ]
-      },
+    // Get recent pages for SEO review
+    const recentPages = await db.page.findMany({
       select: {
         id: true,
         title: true,
         slug: true,
-        metaTitle: true,
-        metaDescription: true,
+        seoData: true,
         published: true,
         updatedAt: true
       },
@@ -131,24 +61,17 @@ export async function GET(request: NextRequest) {
       overview: {
         totalPages,
         publishedPages,
-        seoScore: Math.round(((totalPages - missingMetaTitles - missingMetaDescriptions) / (totalPages * 2)) * 100)
+        pagesWithSEO,
+        totalCarSeries,
+        seoScore: totalPages > 0 ? Math.round((pagesWithSEO / totalPages) * 100) : 0
       },
-      issues: {
-        missingMetaTitles,
-        missingMetaDescriptions,
-        longMetaTitles,
-        longMetaDescriptions,
-        duplicateMetaTitles
-      },
-      pagesWithIssues,
-      recommendations: generateSEORecommendations({
-        missingMetaTitles,
-        missingMetaDescriptions,
-        longMetaTitles,
-        longMetaDescriptions,
-        duplicateMetaTitles,
-        totalPages
-      })
+      recentPages,
+      recommendations: [
+        'Add meta descriptions to pages without SEO data',
+        'Optimize page titles for search engines',
+        'Review and update existing SEO metadata',
+        'Ensure all published pages have proper SEO data'
+      ]
     }
 
     return successResponse(seoData)
@@ -163,7 +86,7 @@ export async function POST(request: NextRequest) {
     validateMethod(request, 'POST')
 
     const body = await parseRequestBody(request)
-    const { action, pageIds, template } = body
+    const { action, pageIds } = body
 
     if (!action || !Array.isArray(pageIds)) {
       return errorResponse('Action and pageIds array are required', 400)
@@ -172,48 +95,28 @@ export async function POST(request: NextRequest) {
     let updatedCount = 0
 
     switch (action) {
-      case 'generate_meta_titles':
+      case 'generate_seo_data':
         for (const pageId of pageIds) {
           const page = await db.page.findUnique({
             where: { id: pageId },
-            select: { title: true }
+            select: { title: true, seoData: true }
           })
-          
+
           if (page) {
+            const currentSeoData = (page.seoData as any) || {}
             await db.page.update({
               where: { id: pageId },
               data: {
-                metaTitle: template ? 
-                  template.replace('{title}', page.title) : 
-                  `${page.title} | JuniorCars`
+                seoData: {
+                  ...currentSeoData,
+                  metaTitle: currentSeoData.metaTitle || `${page.title} | JuniorCars`,
+                  metaDescription: currentSeoData.metaDescription || `Learn more about ${page.title} at JuniorCars.`
+                }
               }
             })
             updatedCount++
           }
         }
-        break
-
-      case 'generate_meta_descriptions':
-        for (const pageId of pageIds) {
-          const page = await db.page.findUnique({
-            where: { id: pageId },
-            select: { title: true, content: true }
-          })
-          
-          if (page) {
-            const description = template ? 
-              template.replace('{title}', page.title) :
-              generateMetaDescription(page.title, page.content)
-            
-            await db.page.update({
-              where: { id: pageId },
-              data: { metaDescription: description }
-            })
-            updatedCount++
-          }
-        }
-        break
-
       default:
         return errorResponse('Invalid action', 400)
     }
@@ -227,74 +130,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateSEORecommendations(issues: any) {
-  const recommendations = []
 
-  if (issues.missingMetaTitles > 0) {
-    recommendations.push({
-      type: 'error',
-      title: 'Missing Meta Titles',
-      description: `${issues.missingMetaTitles} pages are missing meta titles`,
-      action: 'Add unique, descriptive meta titles (50-60 characters)',
-      priority: 'high'
-    })
-  }
-
-  if (issues.missingMetaDescriptions > 0) {
-    recommendations.push({
-      type: 'error',
-      title: 'Missing Meta Descriptions',
-      description: `${issues.missingMetaDescriptions} pages are missing meta descriptions`,
-      action: 'Add compelling meta descriptions (150-160 characters)',
-      priority: 'high'
-    })
-  }
-
-  if (issues.longMetaTitles > 0) {
-    recommendations.push({
-      type: 'warning',
-      title: 'Long Meta Titles',
-      description: `${issues.longMetaTitles} pages have meta titles longer than 60 characters`,
-      action: 'Shorten meta titles to improve search result display',
-      priority: 'medium'
-    })
-  }
-
-  if (issues.longMetaDescriptions > 0) {
-    recommendations.push({
-      type: 'warning',
-      title: 'Long Meta Descriptions',
-      description: `${issues.longMetaDescriptions} pages have meta descriptions longer than 160 characters`,
-      action: 'Shorten meta descriptions to prevent truncation',
-      priority: 'medium'
-    })
-  }
-
-  if (issues.duplicateMetaTitles > 0) {
-    recommendations.push({
-      type: 'warning',
-      title: 'Duplicate Meta Titles',
-      description: `${issues.duplicateMetaTitles} meta titles are used on multiple pages`,
-      action: 'Make each meta title unique to avoid SEO conflicts',
-      priority: 'medium'
-    })
-  }
-
-  return recommendations
-}
-
-function generateMetaDescription(title: string, content?: string): string {
-  if (content) {
-    // Extract first sentence or 150 characters from content
-    const plainText = content.replace(/<[^>]*>/g, '').trim()
-    const firstSentence = plainText.split('.')[0]
-    
-    if (firstSentence.length <= 150) {
-      return firstSentence + '.'
-    } else {
-      return plainText.substring(0, 147) + '...'
-    }
-  }
-  
-  return `Learn more about ${title} at JuniorCars. Discover amazing cars and automotive content.`
-}
