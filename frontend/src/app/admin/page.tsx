@@ -203,6 +203,16 @@ export default function AdminDashboard() {
                 <div className="text-sm text-orange-500 mt-1">Upload and manage images</div>
               </Link>
             </div>
+
+            <div className="mt-4">
+              <Link
+                href="/admin/seo"
+                className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg p-4 text-center transition-colors block"
+              >
+                <div className="text-indigo-600 font-medium">SEO Management</div>
+                <div className="text-sm text-indigo-500 mt-1">Optimize for search engines</div>
+              </Link>
+            </div>
           </div>
         </div>
 
