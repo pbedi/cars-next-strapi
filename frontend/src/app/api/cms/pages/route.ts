@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { db } from '../../../../lib/cms/db'
-import { createPageSchema, paginationSchema, searchSchema } from '../../../../lib/cms/validations'
+import { db } from '@/lib/cms/db'
+import { createPageSchema, paginationSchema, searchSchema } from '@/lib/cms/validations'
 import {
   successResponse,
   errorResponse,
@@ -12,7 +12,7 @@ import {
   buildOrderBy,
   validateMethod,
   generateSlug,
-} from '../../../../lib/cms/api-utils'
+} from '@/lib/cms/api-utils'
 
 // GET /api/cms/pages - List all pages with pagination and search
 export async function GET(request: NextRequest) {

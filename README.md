@@ -1,6 +1,6 @@
 # JuniorCars - Full Stack Application
 
-A modern automotive website built with Next.js frontend and Strapi CMS backend.
+A modern automotive website built with a full-stack Next.js application, featuring a custom-built CMS.
 
 ## 🏗️ Project Structure
 
